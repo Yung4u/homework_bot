@@ -36,7 +36,7 @@ logger.addHandler(handler)
 
 
 def check_tokens():
-    """Проверка токенов"""
+    """Проверка токенов."""
     return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
 
 
@@ -51,7 +51,7 @@ def send_message(bot, message):
 
 def get_api_answer(timestamp):
     """Запрос к API и получение ответа в формате JSON."""
-    params={'from_date': timestamp}
+    params = {'from_date': timestamp}
     try:
         response = requests.get(
             url=ENDPOINT,
@@ -81,11 +81,11 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Информация о статусе работы"""
+    """Информация о статусе работы."""
     homework_status = homework.get('status')
     if (not isinstance(homework, dict)
-        or 'status' not in homework
-        or homework_status not in HOMEWORK_VERDICTS):
+            or 'status' not in homework
+            or homework_status not in HOMEWORK_VERDICTS):
         logging.error(TypeError)
         raise TypeError
     if 'homework_name' not in homework:
@@ -102,7 +102,7 @@ def main():
         logger.critical('Error')
         sys.exit()
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    timestamp = int(time.time())    
+    timestamp = int(time.time())
     last_error = ''
     send_message(bot, 'Бот включился')
     while True:
