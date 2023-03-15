@@ -13,7 +13,7 @@ load_dotenv()
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
+# Повторный запрос проводится каждые 10 минут
 RETRY_PERIOD = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
@@ -25,14 +25,17 @@ HOMEWORK_VERDICTS = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    '%(asctime)s - %(levelname)s - %(message)s'
-)
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+
+def func_logger():
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s'
+    )
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
 
 
 def check_tokens():
@@ -87,10 +90,10 @@ def parse_status(homework):
             or 'status' not in homework
             or homework_status not in HOMEWORK_VERDICTS):
         logging.error(TypeError)
-        raise TypeError
+        raise TypeError('Ошибка данных')
     if 'homework_name' not in homework:
         logging.error(TypeError)
-        raise TypeError
+        raise TypeError('Ошибка данных')
     homework_name = homework.get('homework_name')
     verdict = HOMEWORK_VERDICTS[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
@@ -98,6 +101,7 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
+    logger = func_logger()
     if not check_tokens():
         logger.critical('Error')
         sys.exit()
