@@ -26,18 +26,6 @@ HOMEWORK_VERDICTS = {
 }
 
 
-def func_logger():
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(message)s'
-    )
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
-
-
 def check_tokens():
     """Проверка токенов."""
     return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
@@ -62,13 +50,13 @@ def get_api_answer(timestamp):
             params=params
         )
     except Exception:
-        logger.error('Ошибка API')
+        logging.error('Ошибка API')
     if response.status_code != 200:
         raise ValueError(response.status_code)
     try:
         return response.json()
     except ValueError:
-        logger.error('Ошибка парсинга json')
+        logging.error('Ошибка парсинга json')
         raise ValueError('Ошибка парсинга json')
 
 
@@ -101,9 +89,8 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
-    logger = func_logger()
     if not check_tokens():
-        logger.critical('Error')
+        logging.critical('Error')
         sys.exit()
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
@@ -120,10 +107,10 @@ def main():
                 homework_status = parse_status(current_homework)
                 send_message(bot, lesson_name, homework_status)
             else:
-                logger.debug('Нет статуса')
+                logging.debug('Нет статуса')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            logger.error(message)
+            logging.error(message)
             if message != last_error:
                 send_message(bot, HOMEWORK_VERDICTS)
         finally:
@@ -131,4 +118,12 @@ def main():
 
 
 if __name__ == '__main__':
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s'
+    )
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
     main()
